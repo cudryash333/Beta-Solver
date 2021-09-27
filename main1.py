@@ -58,6 +58,35 @@ def newton_c(x_0, array, debug=False):
     return round(x_n.real, 4) + round(x_n.imag, 4)*1j
 
 
+def formulate (eq, array):
+    for i in range(len(array)-1):
+        if array[i] != 0:
+            if array[i] != 1:
+                eq += str(array[i])
+            eq += "x"
+            if len(array)-i-1 != 1:
+                eq += "^" + str(len(array)-i-1)
+            eq += "+"
+    eq += str(array[len(array) - 1])
+    return eq
+
+
+def write_roots (array):
+    x_n = -2j
+    while True:
+        print("----")
+        if len(array) == 1 or len(array) < 1:
+            break
+        result = newton_c(x_n, array, False)
+        if timeout:
+            print("Process stopped for running too long.")
+            break
+        if result.imag == 0:
+            result = result.real
+        print(result)
+        array = divide_arr(array, [1, -1*result])[:-1]
+
+
 # ax^2+bx+c = [a , b , c]
 # ax^3+bx^2+cx+d = [a , b , c , d]
 # ax^n + bx^n-1 + cx^n ... = [a , b , c ...]
@@ -67,38 +96,16 @@ def newton_c(x_0, array, debug=False):
 a = input()
 coeff = a.split(sep=None, maxsplit=-1)
 my_arr = [int(item) for item in coeff]
-print("Eqaution:")
-eq = ""
-for i in range(len(my_arr)-1):
-    if my_arr[i] != 0:
-        if my_arr[i] != 1:
-            eq += str(my_arr[i])
-        eq += "x"
-        if len(my_arr)-i-1 != 1:
-            eq += "^" + str(len(my_arr)-i-1)
-        eq += "+"
-
-eq += str(my_arr[len(my_arr) - 1]) + "=0"
-print(eq)
-print("Derivative's coefficients: ", derivative(my_arr))
-
-x_n = -2j
+print("Eqaution:", formulate("", my_arr), "= 0")
+print("Derivative:", formulate("", derivative(my_arr)))
 
 second_arr = my_arr[:]
-
-while True:
-    print("----")
-    if len(second_arr) == 1 or len(second_arr) < 1:
-        break
-    result = newton_c(x_n, second_arr, False)
-    if timeout:
-        print("Process stopped for running too long.")
-        break
-    if result.imag == 0:
-        result = result.real
-    print(result)
-    second_arr = divide_arr(second_arr, [1, -1*result])[:-1]
+write_roots(second_arr)
 print("All roots have been shown!")
+
+der_arr = derivative(my_arr)[:]
+write_roots(der_arr)
+print("All extremal points have been shown!")
 
 x = np.linspace(-5, 5, 40)
 y = 0
